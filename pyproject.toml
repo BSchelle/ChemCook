@@ -1,0 +1,13 @@
+[project]
+name = "chemcook"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "backend",
+    "frontend",
+]
