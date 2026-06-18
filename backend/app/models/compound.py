@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List
+from datetime import datetime
 
 class CompoundBase(BaseModel):
     preferred_name: str = Field(..., description="Nom canonique du composé")
@@ -10,7 +11,7 @@ class CompoundBase(BaseModel):
     molecular_weight: Optional[float] = Field(None, gt=0)
     density: Optional[float] = Field(None, gt=0)
     purity: Optional[float] = Field(None, ge=0, le=100)
-    synonyms: list[str] = Field(default_factory=list)
+    synonyms: List[str] = Field(default_factory=List)
 
 class CompoundCreate(CompoundBase):
     pass
@@ -33,4 +34,4 @@ class CompoundUpdate(CompoundBase):
     molecular_weight: Optional[float] = Field(None, gt=0)
     density: Optional[float] = Field(None, gt=0)
     purity: Optional[float] = Field(None, ge=0, le=100)
-    synonyms: Optional[list[str]] = None
+    synonyms: Optional[List[str]] = None
