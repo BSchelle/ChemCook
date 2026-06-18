@@ -23,8 +23,6 @@ class CompoundRead(CompoundBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-
-
 class CompoundUpdate(CompoundBase):
     preferred_name: Optional[str] = None
     commercial_name: Optional[str] = None
