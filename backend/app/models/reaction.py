@@ -30,15 +30,15 @@ class ReactionConditionBase(BaseModel):
     temperature: Optional[float] = None
     temperature_unit: Optional[str] = "C"
     duration_hours: Optional[float] = None
-    atmosphere: Optional[str] = Field(None, description="i.e.: Argon, Nitrogen, Air")
+    atmosphere: Optional[str] = Field(None, description="e.g.: Argon, Nitrogen, Air")
 
 
 class ReactionBase(BaseModel):
     """Reaction descriptors"""
-    name: Optional[str] = Field(None, description="Nom court ou référence de la réaction")
-    target_yield: Optional[float] = Field(None, description="Rendement cible ou rapporté dans la littérature (%)")
-    scale: Optional[float] = Field(None, description="Échelle de la réaction (ex: quantité du réactif limitant)")
-    scale_unit: Optional[str] = Field(None, description="Unité de l'échelle (ex: mmol, g)")
+    name: Optional[str] = Field(None, description="Reaction name")
+    target_yield: Optional[float] = Field(None, description="Targeted or reported yield (%)")
+    scale: Optional[float] = Field(None, description="Scale of the reaction (e.g., amount of the limiting reactant)")
+    scale_unit: Optional[str] = Field(None, description="Unit scale (e.g.: mmol, g)")
 
 class ReactionCreate(ReactionBase):
     """Reaction creation API call"""
@@ -46,13 +46,13 @@ class ReactionCreate(ReactionBase):
     conditions: Optional[ReactionConditionBase] = None
 
 class ReactionRead(ReactionBase):
-    """Exoected format of response for a reactions species API call"""
+    """Exoected response output for a reaction species API call"""
     id: UUID
     species: List[ReactionSpeciesRead] = Field(default_factory=list)
     conditions: Optional[ReactionConditionBase] = None
 
     # Champs enrichis/calculés au niveau de la réaction
-    theoretical_yield_mass: Optional[float] = Field(None, description="Masse théorique du produit calculée")
-    limiting_reagent_id: Optional[UUID] = Field(None, description="ID de l'espèce identifiée comme réactif limitant")
+    theoretical_yield_mass: Optional[float] = Field(None, description="Theoretical calculated mass")
+    limiting_reagent_id: Optional[UUID] = Field(None, description="Reaction species' ID of identified limiting reactant")
 
     model_config = ConfigDict(from_attributes=True)
