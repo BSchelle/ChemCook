@@ -9,6 +9,11 @@ class ReactionSpeciesBase(BaseModel):
     unit : Optional[str] = Field(None, description="Unit of the quantity (e.g., moles, grams)")
     equivalents : Optional[float] = Field(None, description="Equivalents of the species in the reaction")
     concentration : Optional[float] = Field(None, description="Concentration of the species in the reaction")
+    density: Optional[float] = Field(None, gt=0, description="Density to convert volume to mass")
+    purity: Optional[float] = Field(None, ge=0, le=100, description="Purity (%)")
+    mass_fraction : Optional[float] = Field(None, ge=0, le=100, description="Mass fraction of compound (in mass %)")
+    molar_fraction : Optional[float] = Field(None, ge=0, le=100, description="Molar fraction of compound (in mole %)")
+
 
 class RectionSpeciesCreate(ReactionSpeciesBase):
     """To create a reaction species"""
