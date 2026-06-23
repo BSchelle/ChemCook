@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from common import RoleEnum, CompoundRefBase
+from common import RoleEnum, CompoundRefBase, SpeciesQtyBase
 
 class ReactionBase(BaseModel):
     """Reaction descriptors"""
@@ -10,20 +10,10 @@ class ReactionBase(BaseModel):
     scale_unit: Optional[str] = Field(None,  description="Unit scale (e.g.: mmol, g)")
 
 class ReactionSpeciesBase(BaseModel):
-    """Commonly shared properties of all reactant species"""
-    compound_id : int = Field(..., description="DB's ID of compound")
-
-    role : RoleEnum = Field(..., description="Role of the species in the reaction (e.g., reactant, product, catalyst)")
-    coeff : float = Field(..., gt=0, description="Stoichiometric coefficient")
-
-    quantity : Optional[float] = Field(None, description="Quantity of the species in moles")
-    unit : Optional[str] = Field(None, description="Unit of the quantity (e.g., moles, grams)")
-    equivalents : Optional[float] = Field(None, description="Equivalents of the species in the reaction")
-    concentration : Optional[float] = Field(None, description="Concentration of the species in the reaction")
-    density: Optional[float] = Field(None, gt=0, description="Density to convert volume to mass")
-    purity: Optional[float] = Field(None, ge=0, le=100, description="Purity (%)")
-    mass_fraction : Optional[float] = Field(None, ge=0, le=100, description="Mass fraction of compound (in mass %)")
-    molar_fraction : Optional[float] = Field(None, ge=0, le=100, description="Molar fraction of compound (in mole %)")
+    compound_id: int = Field(..., description="DB's ID of compound")
+    role: RoleEnum = Field(..., description="Role in the reaction")
+    coeff: float = Field(..., gt=0, description="Stochiometric coefficient")
+    qty: Optional[SpeciesQtyBase] = Field(None, description="Quantity of species")
 
 class RectionSpeciesCreate(ReactionSpeciesBase):
     """To create a reaction species"""
