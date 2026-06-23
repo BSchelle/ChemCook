@@ -1,34 +1,49 @@
-def quantity_to_moles(quantity: float | None, unit: str | None, mw: float | None,
+from typing import Sequence
+from backend.app.models.common import RoleEnum, SpeciesQtyBase, UnitEnum
+from backend.app.models.reaction  import ReactionSpeciesRead
+
+
+def quantity_to_moles(qty : SpeciesQtyBase | None, unit: str | None, mw: float | None,
                       density: float | None = None) -> float | None:
     """Converts quantity to moles from masses or volumes"""
 
-    if quantity is None or unit is None:
+    if qty is None:
         return None
-    if unit == "mol":
-        return quantity
-    if unit == "mmol":
-        return quantity / 1000
-    if unit == "g" and mw:
-        return quantity / mw
-    if unit == "mg" and mw:
-        return (quantity / 1000) / mw
-    if unit == "mL" and density and mw:
-        return (quantity * density) / mw
+
+    if qty.moles is not None:
+        return qty.moles
+
+    if qty.millimoles is not None:
+        return qty.millimoles / 1000
+
+    if qty.qty is not None:
+        value = qty.qty.value
+        unit = qty.qty.unit
+
+        if unit == UnitEnum.MASS_G and mw:
+            return value / mw
+        if unit == UnitEnum.MASS_MG and mw:
+            return (value / 1000) / mw
+        if unit == UnitEnum.VOLUME_ML and density and mw:
+            return (value * density) / mw
+        if unit == UnitEnum.VOLUME_L and density and mw:
+            return (value * 1000 * density) / mw
+
     return None
 
+def find_limiting_reagent(species: Sequence[ReactionSpeciesRead],) -> tuple[int, float]:
+    """Returns (compound_id, xmax) for limiting reagent"""
 
-def find_limiting_reagent(species: list) -> tuple[int, float]:
-    """Returns limiting reactant id and xmax for each reagent"""
-
-    ratios = []
+    ratios: list[tuple[int, float]] = []
     for sp in species:
-        if sp.role != "reactant":
+        if sp.role != RoleEnum.REACTANT:
             continue
         if sp.coeff <= 0:
             continue
-        if sp.moles is None:
+        if sp.calculated_moles is None:
             continue
-        ratios.append((sp.compound_id, sp.moles / sp.coeff)) #creating a 2 item tuple
+        ratios.append((sp.id, sp.calculated_moles / sp.coeff)) #creating a 2 item tuple
+
     if not ratios: #empty list
         raise ValueError('No valid reactant or reactant quantities')
     return min(ratios, key=lambda x: x[1]) #sorts by lowest final advancement values
