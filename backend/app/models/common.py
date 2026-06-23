@@ -63,3 +63,5 @@ class SpeciesQtyBase(BaseModel):
     concentration: Optional[float] = Field(None, gt=0, description="Concentration of solutant (in mol/L²)")
     density: Optional[float] = Field(None, gt=0, description="Density (in kg/m3)")
     purity: Optional[float] = Field(None, ge=0, le=100, description="Purity (in molar %)")
+    mass_fraction: Optional[float] = Field(None, ge=0, le=100, description="Mass fraction (%)")
+    molar_fraction: Optional[float] = Field(None, ge=0, le=100, description="Molar fraction (%)")
