@@ -3,8 +3,11 @@ from backend.app.models.common import RoleEnum, SpeciesQtyBase, UnitEnum
 from backend.app.models.reaction  import ReactionSpeciesRead
 
 
-def quantity_to_moles(qty : SpeciesQtyBase | None, unit: str | None, mw: float | None,
-                      density: float | None = None) -> float | None:
+def quantity_to_moles(
+    qty: SpeciesQtyBase | None,
+    mw: float | None,
+    density: float | None = None,
+) -> float | None:
     """Converts quantity to moles from masses or volumes"""
 
     if qty is None:
@@ -16,18 +19,26 @@ def quantity_to_moles(qty : SpeciesQtyBase | None, unit: str | None, mw: float |
     if qty.millimoles is not None:
         return qty.millimoles / 1000
 
-    if qty.qty is not None:
-        value = qty.qty.value
-        unit = qty.qty.unit
+    if qty.qty is None:
+        return None
 
-        if unit == UnitEnum.MASS_G and mw:
-            return value / mw
-        if unit == UnitEnum.MASS_MG and mw:
-            return (value / 1000) / mw
-        if unit == UnitEnum.VOLUME_ML and density and mw:
-            return (value * density) / mw
-        if unit == UnitEnum.VOLUME_L and density and mw:
-            return (value * 1000 * density) / mw
+    value = qty.qty.value
+    unit = qty.qty.unit
+
+    if unit in (UnitEnum.VOLUME_L, UnitEnum.VOLUME_ML, UnitEnum.VOLUME_M3):
+        if density is None:
+            raise ValueError("Density is required to convert volumes to moles")
+        if mw is None:
+            raise ValueError("Molecular weight is required to convert volumes to moles")
+
+    if unit == UnitEnum.MASS_G and mw:
+        return value / mw
+    if unit == UnitEnum.MASS_MG and mw:
+        return (value / 1000) / mw
+    if unit == UnitEnum.VOLUME_ML and density and mw:
+        return (value * density) / mw
+    if unit == UnitEnum.VOLUME_L and density and mw:
+        return (value * 1000 * density) / mw
 
     return None
 
