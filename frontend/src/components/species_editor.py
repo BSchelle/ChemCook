@@ -3,32 +3,28 @@ from typing import Any, Dict, List
 
 def empty_species_row(index: int) -> Dict[str, Any]:
     """
-    Génère une ligne vide par défaut pour l'éditeur d'espèces.
+    Génère une ligne d'espèce simplifiée, claire et intuitive pour l'éditeur.
     """
     return {
-        "compound_id": index + 1,
         "preferred_name": f"Espèce {index + 1}",
-        "role": "reactant",
-        "coeff": 1.0,
+        "role": "reactant" if index < 2 else "solvent",
+        "eq": 1.0,
         "quantity_value": 1.0,
         "quantity_unit": "mass_g",
-        "molecular_weight": 50.0,
-        "compound_density": None,
-        "species_density": None,
-        "moles": None,
-        "millimoles": None,
+        "molecular_weight": 100.0,
+        "density": None,
     }
 
 def render_species_editor() -> List[Dict[str, Any]]:
     """
-    Affiche le tableau d'édition interactif pour saisir les espèces chimiques.
-    Retourne la liste des lignes saisies par l'utilisateur.
+    Affiche le tableau d'édition simplifié contenant exactement les colonnes
+    demandées pour une lisibilité maximale (qualité portfolio).
     """
     st.subheader("Composition de la Réaction")
     st.markdown(
-        "<p style='color: #94a3b8; font-size: 0.9rem; margin-top: -5px; margin-bottom: 15px;'>"
-        "Saisissez au moins 2 espèces chimiques (réactifs, produits, solvants, etc.) "
-        "avec leurs coefficients stœchiométriques et quantités."
+        "<p style='color: #94a3b8; font-size: 0.95rem; margin-top: -5px; margin-bottom: 15px;'>"
+        "Saisissez vos réactifs, produits et solvants. Renseignez leurs quantités, "
+        "leurs masses molaires, leurs densités (si volume) et leurs équivalents stœchiométriques (eq)."
         "</p>",
         unsafe_allow_html=True
     )
@@ -43,27 +39,23 @@ def render_species_editor() -> List[Dict[str, Any]]:
         num_rows="dynamic",
         hide_index=True,
         column_config={
-            "compound_id": st.column_config.NumberColumn("ID Composé", min_value=1, step=1, help="Identifiant unique du composé"),
-            "preferred_name": st.column_config.TextColumn("Nom de l'espèce", required=True),
+            "preferred_name": st.column_config.TextColumn("Nom de l'espèce", required=True, help="Nom ou formule chimique de la molécule"),
             "role": st.column_config.SelectboxColumn(
                 "Rôle", 
                 options=["reactant", "product", "solvent", "catalyst", "additive"],
                 required=True,
                 help="Rôle de l'espèce dans le processus chimique"
             ),
-            "coeff": st.column_config.NumberColumn("Coeff", min_value=0.0001, format="%.4f", step=0.5, help="Coefficient stœchiométrique (ex: 1, 2, 0.5)"),
-            "quantity_value": st.column_config.NumberColumn("Valeur Qté", min_value=0.0001, format="%.4f", step=1.0, help="Valeur numérique de la quantité engagée"),
+            "eq": st.column_config.NumberColumn("eq", min_value=0.0001, format="%.4f", step=0.5, help="Équivalents stœchiométriques (remplace le coefficient)"),
+            "quantity_value": st.column_config.NumberColumn("Quantité (valeur)", min_value=0.0001, format="%.4f", step=1.0, help="Valeur de la quantité engagée"),
             "quantity_unit": st.column_config.SelectboxColumn(
-                "Unité Qté",
-                options=["mass_g", "mass_mg", "mass_kg", "volume_ml", "volume_l", "volume_m3", "moles", "millimoles"],
+                "Unité",
+                options=["mass_g", "mass_mg", "mass_kg", "volume_ml", "volume_l", "moles", "millimoles"],
                 required=True,
-                help="Unité de mesure associée à la valeur de la quantité"
+                help="Unité de mesure (masse, volume ou quantité de matière)"
             ),
-            "molecular_weight": st.column_config.NumberColumn("Masse Molaire (g/mol)", min_value=0.0001, format="%.2f", step=1.0, help="Masse molaire requise pour convertir en moles"),
-            "compound_density": st.column_config.NumberColumn("Densité Composé (g/mL)", min_value=0.0001, format="%.3f", step=0.1, help="Densité par défaut du composé pur"),
-            "species_density": st.column_config.NumberColumn("Densité Espèce (g/mL)", min_value=0.0001, format="%.3f", step=0.1, help="Densité spécifique de la solution"),
-            "moles": st.column_config.NumberColumn("Moles directes", min_value=0.0001, format="%.6f", step=0.1, help="Saisie directe en moles (écrase la quantité)"),
-            "millimoles": st.column_config.NumberColumn("mmol directes", min_value=0.0001, format="%.3f", step=0.1, help="Saisie directe en millimoles (écrase la quantité)"),
+            "molecular_weight": st.column_config.NumberColumn("Masse Molaire (g/mol)", min_value=0.0001, format="%.2f", step=1.0, help="Masse molaire (requise pour convertir la masse/volume en moles)"),
+            "density": st.column_config.NumberColumn("Densité (g/mL)", min_value=0.0001, format="%.3f", step=0.1, help="Densité de l'espèce (requise pour convertir les volumes en moles)"),
         },
     )
     
@@ -78,41 +70,45 @@ def build_calculation_payload(
     rows: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
     """
-    Transforme les lignes brutes de l'éditeur en payload JSON structuré 
-    attendu par le schéma Pydantic CalculationCreate du backend.
+    Transforme les lignes simplifiées de l'éditeur en payload JSON structuré 
+    attendu par le schéma Pydantic du backend, en effectuant les correspondances nécessaires.
     """
     species = []
-    for row in rows:
+    for index, row in enumerate(rows):
         qty: Dict[str, Any] = {}
-        if row.get("moles") not in (None, ""):
-            qty["moles"] = float(row["moles"])
-        if row.get("millimoles") not in (None, ""):
-            qty["millimoles"] = float(row["millimoles"])
-            
-        # Si pas de saisie directe en moles, on prend la quantité valeur/unité
-        if "moles" not in qty and "millimoles" not in qty:
-            qty["qty"] = {
-                "value": float(row["quantity_value"]),
-                "unit": row["quantity_unit"],
-            }
-        else:
+        unit = row["quantity_unit"]
+        value = float(row["quantity_value"])
+        
+        # Gestion unifiée des unités (moles directes ou grandeurs physiques)
+        if unit == "moles":
+            qty["moles"] = value
             qty["qty"] = None
+        elif unit == "millimoles":
+            qty["millimoles"] = value
+            qty["qty"] = None
+        else:
+            qty["qty"] = {
+                "value": value,
+                "unit": unit,
+            }
+            qty["moles"] = None
+            qty["millimoles"] = None
 
-        # La densité effective correspond à la densité spécifique ou celle du composé
-        density = row.get("species_density") if row.get("species_density") not in (None, "") else row.get("compound_density")
+        # Densité unique
+        density = row.get("density")
         if density not in (None, ""):
             qty["density"] = float(density)
 
         species.append(
             {
                 "compound": {
-                    "compound_id": int(row["compound_id"]),
+                    "compound_id": index + 1,  # Identifiant généré automatiquement
                     "preferred_name": str(row["preferred_name"]),
                     "molecular_weight": float(row["molecular_weight"]) if row.get("molecular_weight") not in (None, "") else None,
-                    "density": float(row["compound_density"]) if row.get("compound_density") not in (None, "") else None,
+                    "density": float(density) if density not in (None, "") else None,
                 },
                 "role": row["role"],
-                "coeff": float(row["coeff"]),
+                "coeff": float(row["eq"]),  # Les équivalents (eq) sont mappés sur le coefficient stœchiométrique
                 "qty": qty,
             }
         )

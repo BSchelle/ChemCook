@@ -1,6 +1,6 @@
 # Configuration globale et Styles CSS pour le Frontend ChemCook
 
-DEFAULT_API_URL = " http://127.0.0.1:8000/api/v1/calculations/preview"
+DEFAULT_API_URL = " http://localhost:8000/api/v1/calculations/preview"
 
 # Styles CSS personnalisés pour masquer l'aspect Streamlit brut et donner un rendu premium "portfolio"
 CUSTOM_CSS = """

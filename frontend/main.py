@@ -10,6 +10,7 @@ from src.components.results_viewer import (
     render_species_results,
     render_advancement_table,
     render_scaled_quantities,
+    render_stoichiometric_equation,
 )
 from src.components.charts import render_stoichiometric_chart
 
@@ -89,6 +90,9 @@ def main() -> None:
                 # Succès - Affichage des résultats
                 st.toast("Calcul stœchiométrique réussi !", icon="✨")
                 
+                # Équation chimique stœchiométrique
+                render_stoichiometric_equation(result.get("species_results", []))
+
                 # Métriques générales
                 render_metrics(result)
                 

@@ -15,6 +15,42 @@ def _get_role_badge(role: str) -> str:
     label = role_translations.get(role, role.capitalize())
     return f'<span class="role-badge role-{role}">{label}</span>'
 
+def render_stoichiometric_equation(species_results: List[Dict[str, Any]]) -> None:
+    """
+    Génère et affiche l'équation chimique stœchiométrique équilibrée à partir
+    des équivalents (eq) saisis par l'utilisateur.
+    """
+    reactants = []
+    products = []
+    
+    for sp in species_results:
+        compound = sp.get("compound", {})
+        name = compound.get("preferred_name", "N/A")
+        role = sp.get("role", "reactant")
+        coeff = sp.get("coeff", 1.0)
+        
+        # Formate le terme (ex: "2 H2O" ou "Aspirine")
+        coeff_str = f"{coeff:.4g} " if coeff != 1.0 else ""
+        term = f"{coeff_str}{name}"
+        
+        if role == "reactant":
+            reactants.append(term)
+        elif role == "product":
+            products.append(term)
+            
+    if not reactants or not products:
+        return
+        
+    equation_str = " + ".join(reactants) + " &nbsp;➔&nbsp; " + " + ".join(products)
+    
+    st.markdown(
+        f'<div style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(45, 212, 191, 0.15); border-radius: 12px; padding: 22px; text-align: center; margin: 20px 0; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);">'
+        f'<span style="color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 8px; font-weight: 700;">Équation Chimique Stœchiométrique</span>'
+        f'<span style="font-size: 1.5rem; font-weight: 700; color: #f1f5f9; background: linear-gradient(135deg, #cbd5e1, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.01em; line-height: 1.4;">{equation_str}</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
 def render_metrics(result: Dict[str, Any]) -> None:
     """
     Affiche la grille de métriques stœchiométriques clés sous forme de cartes.
@@ -61,7 +97,7 @@ def render_species_results(species_results: List[Dict[str, Any]]) -> None:
     """
     st.subheader("Résultats par Espèce")
     headers = [
-        "Espèce", "Rôle", "Coeff.", "Limitant ?", 
+        "Espèce", "Rôle", "eq", "Limitant ?", 
         "Moles Initiales", "Moles Finales", "Masse Requise", "Volume Requis"
     ]
     
@@ -98,9 +134,10 @@ def render_advancement_table(avancement_rows: List[Dict[str, Any]]) -> None:
     """
     st.subheader("Tableau d'Avancement Réactif/Produit")
     headers = [
-        "Espèce", "Rôle", "Coeff.", 
+        "Espèce", "Rôle", "eq", 
         "Quantité Initiale (t=0)", "Variation (Δn)", "Quantité Finale (t_final)"
     ]
+
     
     rows = []
     for row_data in avancement_rows:
