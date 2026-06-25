@@ -35,6 +35,8 @@ class CalculationBase(BaseModel):
     target_yield_percent : Optional[float] = Field(None, ge=0, le=100, description="Expected yield percent of reaction")
     scale_factor : Optional[float] = Field (None, gt=0, description="Multiplication factor of reaction scaling")
     target_mass_product_g : Optional[float] = Field(None, gt=0, description="Expected mass of desired compound")
+    primary_product_id : Optional[int] = Field(None, description="Compound ID of the primary product for yield and scale calculations")
+
 
 class CalculationCreate(CalculationBase):
     pass
