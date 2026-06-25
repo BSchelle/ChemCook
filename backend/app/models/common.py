@@ -54,6 +54,7 @@ class CompoundRefBase(BaseModel):
     formula: Optional[str] = Field(None, description="Chemical formula")
     smiles: Optional[str] = Field(None, description="SMILES canonical")
     molecular_weight: Optional[float] = Field(None, gt=0, description="Molecular weight (in g/mol)")
+    density: Optional[float] = Field(None, gt=0, description="Density (in kg/m3)")
 
 class SpeciesQtyBase(BaseModel):
     qty : Optional[QtyBase] = None
@@ -63,3 +64,5 @@ class SpeciesQtyBase(BaseModel):
     concentration: Optional[float] = Field(None, gt=0, description="Concentration of solutant (in mol/L²)")
     density: Optional[float] = Field(None, gt=0, description="Density (in kg/m3)")
     purity: Optional[float] = Field(None, ge=0, le=100, description="Purity (in molar %)")
+    mass_fraction: Optional[float] = Field(None, ge=0, le=100, description="Mass fraction (%)")
+    molar_fraction: Optional[float] = Field(None, ge=0, le=100, description="Molar fraction (%)")

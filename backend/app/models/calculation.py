@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
 
-from common import CompoundRefBase, RoleEnum, SpeciesQtyBase
+from pydantic import BaseModel, Field
+
+from backend.app.models.common import CompoundRefBase, RoleEnum, SpeciesQtyBase
 
 
 ### Classes for one species calculation
@@ -45,7 +46,7 @@ class AvancementRow(BaseModel):
     coeff : float = Field(..., gt=0, description="stoichiometric amount of compound" )
     n_init : float = Field(..., ge=0, description="Initial quantity of matter of compound at t_0")
     n_final : Optional[float] = Field(None, ge=0, description="Final quantity of matter of compound t_final")
-    delta_n : Optional[float] = Field(None, ge=0, description="Difference of quantity of matter between t_final and t_0")
+    delta_n : Optional[float] = Field(None, description="Difference of quantity of matter between t_final and t_0")
 
 
 class CalculationRead(CalculationBase):
