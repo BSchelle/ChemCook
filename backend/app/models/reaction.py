@@ -1,6 +1,8 @@
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, List
-from common import RoleEnum, CompoundRefBase, SpeciesQtyBase
+
+from backend.app.models.common import CompoundRefBase, RoleEnum, SpeciesQtyBase
 
 class ReactionBase(BaseModel):
     """Reaction descriptors"""

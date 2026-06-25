@@ -54,6 +54,7 @@ class CompoundRefBase(BaseModel):
     formula: Optional[str] = Field(None, description="Chemical formula")
     smiles: Optional[str] = Field(None, description="SMILES canonical")
     molecular_weight: Optional[float] = Field(None, gt=0, description="Molecular weight (in g/mol)")
+    density: Optional[float] = Field(None, gt=0, description="Density (in kg/m3)")
 
 class SpeciesQtyBase(BaseModel):
     qty : Optional[QtyBase] = None
