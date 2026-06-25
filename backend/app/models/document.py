@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
-from common import QtyBase, SectionEnum
+from backend.app.models.common import QtyBase, SectionEnum
 
 # Document section extraction
 
